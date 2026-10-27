@@ -11,13 +11,7 @@
             theme: {
                 extend: {
                     colors: {
-                        brand: {
-                            50: '#f0f3ff',
-                            500: '#6366f1',
-                            600: '#4f46e5',
-                            900: '#0f172a',
-                            dark: '#090d16'
-                        }
+                        brand: { 50: '#f0f3ff', 500: '#6366f1', 600: '#4f46e5', 900: '#0f172a', dark: '#090d16' }
                     }
                 }
             }
@@ -25,16 +19,8 @@
     </script>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        .glass {
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        .glass-panel {
-            background: rgba(30, 41, 59, 0.5);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
+        .glass { background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(16px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glass-panel { background: rgba(30, 41, 59, 0.5); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.05); }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.6); }
         ::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.4); border-radius: 3px; }
@@ -43,7 +29,6 @@
 </head>
 <body id="bodyTheme" class="bg-[#070a10] text-slate-100 font-sans antialiased min-h-screen flex flex-col justify-between overflow-x-hidden selection:bg-indigo-500 selection:text-white">
 
-    <!-- Top Navbar -->
     <header class="sticky top-0 z-40 glass border-b border-slate-800/80 px-6 py-4 flex items-center justify-between">
         <div class="flex items-center gap-3">
             <div id="logoIcon" class="w-10 h-10 rounded-xl bg-gradient-to-tr from-indigo-600 via-purple-600 to-pink-500 flex items-center justify-center shadow-lg shadow-indigo-500/30">
@@ -56,27 +41,14 @@
         </div>
 
         <div class="relative max-w-md w-full mx-4 hidden md:block">
-            <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+            <button id="deskSearchBtn" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-400 transition z-10"><i class="fa-solid fa-magnifying-glass"></i></button>
             <input type="text" id="searchInput" placeholder="Search songs, artists, albums..." class="w-full bg-slate-900/90 border border-slate-700/60 rounded-full py-2.5 pl-11 pr-4 text-sm text-slate-100 placeholder-slate-400 focus:outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 transition-all">
         </div>
-
-        <div class="flex items-center gap-3">
-            <!-- Theme Switcher -->
-            <select id="themeSelector" class="bg-slate-900 border border-slate-700 text-xs text-slate-300 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-indigo-500">
-                <option value="indigo">💜 Neon Indigo</option>
-                <option value="cyan">🩵 Cyber Cyan</option>
-                <option value="rose">💖 Hot Rose</option>
-                <option value="emerald">💚 Emerald Matrix</option>
-            </select>
-        </div>
+        <div class="flex items-center gap-3 w-10"></div>
     </header>
 
-    <!-- Main Content Area -->
     <main class="flex-1 max-w-7xl w-full mx-auto p-6 grid grid-cols-1 lg:grid-cols-3 gap-6 mb-32">
-        
-        <!-- Left 2 Columns: Tabs & Content -->
         <section class="lg:col-span-2 space-y-6">
-            <!-- Navigation Tabs -->
             <div class="flex items-center gap-2 border-b border-slate-800 pb-3 overflow-x-auto">
                 <button onclick="switchTab('discover')" id="tab-discover" class="px-4 py-2 rounded-xl text-sm font-medium bg-indigo-600 text-white transition shadow-md shadow-indigo-600/30">Discover</button>
                 <button onclick="switchTab('playlists')" id="tab-playlists" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/60 transition">Playlists & Liked</button>
@@ -84,116 +56,63 @@
                 <button onclick="switchTab('lyrics')" id="tab-lyrics" class="px-4 py-2 rounded-xl text-sm font-medium text-slate-400 hover:text-white hover:bg-slate-800/60 transition">Live Lyrics</button>
             </div>
 
-            <!-- Mobile Search Bar -->
             <div class="relative w-full md:hidden">
-                <i class="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                <button id="mobSearchBtn" class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-indigo-400 transition z-10"><i class="fa-solid fa-magnifying-glass"></i></button>
                 <input type="text" id="mobileSearchInput" placeholder="Search songs..." class="w-full bg-slate-900/90 border border-slate-700/60 rounded-full py-2 pl-11 pr-4 text-sm text-slate-100 placeholder-slate-400">
             </div>
 
-            <!-- Tab 1: Discover -->
             <div id="content-discover" class="space-y-4">
                 <div class="glass-panel p-6 rounded-2xl">
                     <div class="flex items-center justify-between mb-4">
-                        <h2 class="text-lg font-semibold text-slate-100 flex items-center gap-2">
-                            <i class="fa-solid fa-fire text-indigo-400"></i> Trending & Search Results
-                        </h2>
-                        <span id="resultsCount" class="text-xs text-slate-400">Showing top results</span>
+                        <h2 class="text-lg font-semibold text-slate-100 flex items-center gap-2"><i class="fa-solid fa-fire text-indigo-400"></i> Trending & Search Results</h2>
                     </div>
-                    <div id="songsList" class="space-y-2 max-h-[500px] overflow-y-auto pr-1">
-                        <div class="text-center py-12 text-slate-400 text-sm">
-                            <i class="fa-solid fa-spinner fa-spin text-2xl text-indigo-500 mb-3 block"></i>Loading tracks...
-                        </div>
-                    </div>
+                    <div id="songsList" class="space-y-2 max-h-[500px] overflow-y-auto pr-1"></div>
                 </div>
             </div>
 
-            <!-- Tab 2: Playlists -->
             <div id="content-playlists" class="space-y-4 hidden">
                 <div class="glass-panel p-6 rounded-2xl space-y-4">
                     <div class="flex items-center justify-between">
-                        <h2 class="text-lg font-semibold text-slate-100 flex items-center gap-2">
-                            <i class="fa-solid fa-heart text-rose-500"></i> Liked Songs & Saved Queue
-                        </h2>
+                        <h2 class="text-lg font-semibold text-slate-100 flex items-center gap-2"><i class="fa-solid fa-heart text-rose-500"></i> Liked Songs</h2>
                         <button onclick="clearLiked()" class="text-xs text-slate-400 hover:text-rose-400 transition">Clear All</button>
                     </div>
-                    <div id="likedSongsList" class="space-y-2 max-h-[450px] overflow-y-auto pr-1">
-                        <p class="text-slate-400 text-sm text-center py-10">No liked songs yet. Click the heart icon on any track!</p>
-                    </div>
+                    <div id="likedSongsList" class="space-y-2 max-h-[450px] overflow-y-auto pr-1"></div>
                 </div>
             </div>
 
-            <!-- Tab 3: Equalizer -->
             <div id="content-equalizer" class="space-y-4 hidden">
                 <div class="glass-panel p-6 rounded-2xl space-y-6">
-                    <h2 class="text-lg font-semibold text-slate-100 flex items-center gap-2">
-                        <i class="fa-solid fa-sliders text-indigo-400"></i> Pro Audio Equalizer & Sleep Timer
-                    </h2>
-                    
+                    <h2 class="text-lg font-semibold text-slate-100 flex items-center gap-2"><i class="fa-solid fa-sliders text-indigo-400"></i> Pro Audio Equalizer</h2>
                     <div class="grid grid-cols-3 gap-4">
-                        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-center">
-                            <label class="text-xs text-slate-400 block mb-2">Bass (60Hz)</label>
-                            <input type="range" id="bassGain" min="-20" max="20" value="0" step="1" class="w-24 accent-indigo-500 cursor-pointer">
-                        </div>
-                        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-center">
-                            <label class="text-xs text-slate-400 block mb-2">Mid (1kHz)</label>
-                            <input type="range" id="midGain" min="-20" max="20" value="0" step="1" class="w-24 accent-indigo-500 cursor-pointer">
-                        </div>
-                        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-center">
-                            <label class="text-xs text-slate-400 block mb-2">Treble (14kHz)</label>
-                            <input type="range" id="trebleGain" min="-20" max="20" value="0" step="1" class="w-24 accent-indigo-500 cursor-pointer">
-                        </div>
-                    </div>
-
-                    <div class="pt-4 border-t border-slate-800/80">
-                        <h3 class="text-sm font-medium text-slate-300 mb-3 flex items-center gap-2">
-                            <i class="fa-solid fa-clock text-indigo-400"></i> Sleep Timer (Auto Pause)
-                        </h3>
-                        <div class="flex flex-wrap gap-3">
-                            <button onclick="setSleepTimer(15)" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-indigo-600 text-xs font-medium transition">15 mins</button>
-                            <button onclick="setSleepTimer(30)" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-indigo-600 text-xs font-medium transition">30 mins</button>
-                            <button onclick="setSleepTimer(45)" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-indigo-600 text-xs font-medium transition">45 mins</button>
-                            <button onclick="setSleepTimer(60)" class="px-4 py-2 rounded-xl bg-slate-800 hover:bg-indigo-600 text-xs font-medium transition">60 mins</button>
-                            <button onclick="clearSleepTimer()" class="px-4 py-2 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20 text-xs font-medium transition">Cancel Timer</button>
-                        </div>
-                        <p id="timerStatus" class="text-xs text-indigo-400 mt-2 font-medium"></p>
+                        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-center"><label class="text-xs text-slate-400 block mb-2">Bass</label><input type="range" min="-20" max="20" value="0" class="w-24 accent-indigo-500 cursor-pointer"></div>
+                        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-center"><label class="text-xs text-slate-400 block mb-2">Mid</label><input type="range" min="-20" max="20" value="0" class="w-24 accent-indigo-500 cursor-pointer"></div>
+                        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-800 text-center"><label class="text-xs text-slate-400 block mb-2">Treble</label><input type="range" min="-20" max="20" value="0" class="w-24 accent-indigo-500 cursor-pointer"></div>
                     </div>
                 </div>
             </div>
 
-            <!-- Tab 4: Live Lyrics -->
             <div id="content-lyrics" class="space-y-4 hidden">
-                <div class="glass-panel p-6 rounded-2xl text-center space-y-4 min-h-[350px] flex flex-col justify-center items-center">
-                    <h2 class="text-sm font-semibold text-indigo-400 uppercase tracking-widest">Karaoke Synced Lyrics</h2>
-                    <div id="lyricsContainer" class="space-y-3 text-slate-300 text-sm max-h-[250px] overflow-y-auto px-4 w-full">
-                        <p class="text-slate-500 italic">Play a track to view dynamic synced lyrics simulation...</p>
+                <div class="glass-panel p-6 rounded-2xl text-center space-y-4 min-h-[350px] flex flex-col justify-start items-center relative">
+                    <h2 class="text-sm font-semibold text-indigo-400 uppercase tracking-widest sticky top-0 bg-[#0f172a]/90 w-full p-2 z-10 backdrop-blur-md rounded-lg">Live Lyrics</h2>
+                    <div id="lyricsContainer" class="text-slate-300 text-sm max-h-[300px] overflow-y-auto px-4 w-full pt-4">
+                        <p class="text-slate-500 italic mt-10">Play a track to load real lyrics...</p>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Right Column: Visualizer & Now Playing -->
         <section class="space-y-6">
-            <!-- Spectrum Visualizer -->
             <div class="glass-panel p-6 rounded-2xl flex flex-col items-center">
-                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4 w-full flex items-center justify-between">
-                    <span>Audio Spectrum</span>
-                    <i class="fa-solid fa-chart-simple text-indigo-400"></i>
-                </h3>
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-4 w-full flex items-center justify-between"><span>Audio Spectrum</span><i class="fa-solid fa-chart-simple text-indigo-400"></i></h3>
                 <canvas id="visualizer" class="w-full h-36 rounded-xl bg-slate-950/80 border border-slate-800/80"></canvas>
             </div>
-
-            <!-- Now Playing Card -->
             <div class="glass-panel p-6 rounded-2xl space-y-4">
-                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between">
-                    <span>Now Playing Info</span>
-                    <i class="fa-solid fa-circle-info text-indigo-400"></i>
-                </h3>
+                <h3 class="text-xs font-semibold text-slate-400 uppercase tracking-wider flex items-center justify-between"><span>Now Playing</span><i class="fa-solid fa-circle-info text-indigo-400"></i></h3>
                 <div class="flex items-center gap-4">
                     <img id="nowPlayingArt" src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=150" class="w-16 h-16 rounded-xl object-cover border border-slate-700 shadow-md">
                     <div class="overflow-hidden flex-1">
                         <p id="nowPlayingTitle" class="font-semibold text-sm text-slate-100 truncate">Select a song</p>
-                        <p id="nowPlayingArtist" class="text-xs text-slate-400 truncate">ECHOES Pro Suite</p>
-                        <p id="nowPlayingAlbum" class="text-[11px] text-indigo-400/80 truncate mt-1">Global Stream</p>
+                        <p id="nowPlayingArtist" class="text-xs text-slate-400 truncate">ECHOES</p>
                     </div>
                     <button id="likeTrackBtn" onclick="toggleLikeCurrent()" class="text-slate-500 hover:text-rose-500 text-xl transition"><i class="fa-solid fa-heart"></i></button>
                 </div>
@@ -201,25 +120,19 @@
         </section>
     </main>
 
-    <!-- Bottom Player Dock -->
     <footer class="fixed bottom-0 left-0 right-0 glass border-t border-slate-800/80 px-6 py-3 z-50">
         <div class="max-w-7xl mx-auto flex items-center justify-between gap-4">
-            <!-- Currently Playing Thumb -->
             <div class="flex items-center gap-3 w-1/4">
                 <img id="dockArt" src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?w=100" class="w-12 h-12 rounded-lg object-cover border border-slate-700">
                 <div class="truncate">
-                    <p id="dockTitle" class="text-sm font-medium text-slate-100 truncate">Ready to play</p>
-                    <p id="dockArtist" class="text-xs text-slate-400 truncate">Search or click play</p>
+                    <p id="dockTitle" class="text-sm font-medium text-slate-100 truncate">Ready</p>
+                    <p id="dockArtist" class="text-xs text-slate-400 truncate">Play</p>
                 </div>
             </div>
-
-            <!-- Center Controls -->
             <div class="flex flex-col items-center gap-1.5 w-2/4 max-w-md">
                 <div class="flex items-center gap-6">
                     <button id="prevBtn" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-backward-step text-lg"></i></button>
-                    <button id="playBtn" class="w-10 h-10 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center shadow-lg shadow-indigo-600/40 transition">
-                        <i class="fa-solid fa-play text-sm ml-0.5" id="playIcon"></i>
-                    </button>
+                    <button id="playBtn" class="w-10 h-10 rounded-full bg-indigo-600 hover:bg-indigo-500 text-white flex items-center justify-center shadow-lg transition"><i class="fa-solid fa-play text-sm ml-0.5" id="playIcon"></i></button>
                     <button id="nextBtn" class="text-slate-400 hover:text-white transition"><i class="fa-solid fa-forward-step text-lg"></i></button>
                 </div>
                 <div class="w-full flex items-center gap-2 text-xs text-slate-400">
@@ -228,8 +141,6 @@
                     <span id="duration">0:00</span>
                 </div>
             </div>
-
-            <!-- Right Volume -->
             <div class="flex items-center justify-end gap-3 w-1/4">
                 <i class="fa-solid fa-volume-high text-slate-400 text-sm"></i>
                 <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.8" class="w-20 h-1 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500">
@@ -244,8 +155,6 @@
         const playBtn = document.getElementById('playBtn');
         const playIcon = document.getElementById('playIcon');
         const progressBar = document.getElementById('progressBar');
-        const currentTimeEl = document.getElementById('currentTime');
-        const durationEl = document.getElementById('duration');
         const searchInput = document.getElementById('searchInput');
         const mobileSearchInput = document.getElementById('mobileSearchInput');
         const songsList = document.getElementById('songsList');
@@ -254,23 +163,7 @@
         let currentTracks = [];
         let currentIndex = 0;
         let likedTracks = JSON.parse(localStorage.getItem('echoes_liked') || '[]');
-        let sleepTimerTimeout = null;
 
-        // Theme Management
-        const themeSelector = document.getElementById('themeSelector');
-        themeSelector.addEventListener('change', (e) => {
-            const val = e.target.value;
-            const accentClasses = {
-                indigo: { primary: 'bg-indigo-600', text: 'text-indigo-400', border: 'border-indigo-500' },
-                cyan: { primary: 'bg-cyan-600', text: 'text-cyan-400', border: 'border-cyan-500' },
-                rose: { primary: 'bg-rose-600', text: 'text-rose-400', border: 'border-rose-500' },
-                emerald: { primary: 'bg-emerald-600', text: 'text-emerald-400', border: 'border-emerald-500' }
-            };
-            // Update accent styling elements dynamically
-            playBtn.className = `w-10 h-10 rounded-full text-white flex items-center justify-center shadow-lg transition ${accentClasses[val].primary}`;
-        });
-
-        // Tabs
         function switchTab(tabName) {
             ['discover', 'playlists', 'equalizer', 'lyrics'].forEach(t => {
                 document.getElementById(`content-${t}`).classList.add('hidden');
@@ -278,10 +171,9 @@
             });
             document.getElementById(`content-${tabName}`).classList.remove('hidden');
             document.getElementById(`tab-${tabName}`).className = "px-4 py-2 rounded-xl text-sm font-medium bg-indigo-600 text-white transition shadow-md shadow-indigo-600/30";
-            if (tabName === 'playlists') renderLikedSongs();
+            if (tabName === 'playlists') renderSongs(likedTracks, likedSongsList);
         }
 
-        // Fetch Songs from iTunes API
         async function fetchSongs(query = 'Arijit Singh') {
             songsList.innerHTML = `<div class="text-center py-12 text-slate-400 text-sm"><i class="fa-solid fa-spinner fa-spin text-2xl text-indigo-500 mb-3 block"></i>Searching tracks...</div>`;
             try {
@@ -290,32 +182,25 @@
                 currentTracks = data.results.filter(item => item.previewUrl);
                 renderSongs(currentTracks, songsList);
             } catch (err) {
-                songsList.innerHTML = `<p class="text-rose-400 text-center py-8">Failed to fetch songs. Try another search.</p>`;
+                songsList.innerHTML = `<p class="text-rose-400 text-center py-8">Failed to fetch songs.</p>`;
             }
         }
 
         function renderSongs(tracks, container) {
-            if (!tracks.length) {
-                container.innerHTML = `<p class="text-slate-400 text-center py-8">No tracks found.</p>`;
-                return;
-            }
+            if (!tracks.length) { container.innerHTML = `<p class="text-slate-400 text-center py-8">No tracks found.</p>`; return; }
             container.innerHTML = tracks.map((track, idx) => {
                 const isLiked = likedTracks.some(t => t.trackId === track.trackId);
-                return `
-                <div class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-800/60 transition group border border-transparent hover:border-slate-700/50">
+                return `<div class="flex items-center justify-between p-3 rounded-xl hover:bg-slate-800/60 transition group border border-transparent hover:border-slate-700/50">
                     <div onclick="playTrack(${idx})" class="flex items-center gap-3 cursor-pointer flex-1 overflow-hidden">
                         <img src="${track.artworkUrl100}" class="w-11 h-11 rounded-lg object-cover">
                         <div class="truncate">
-                            <p class="text-sm font-medium text-slate-100 group-hover:text-indigo-400 transition truncate">${track.trackName}</p>
+                            <p class="text-sm font-medium text-slate-100 truncate">${track.trackName}</p>
                             <p class="text-xs text-slate-400 truncate">${track.artistName}</p>
                         </div>
                     </div>
                     <div class="flex items-center gap-3">
                         <button onclick='toggleLike(${JSON.stringify(track).replace(/'/g, "&apos;")})' class="text-slate-500 hover:text-rose-500 transition text-sm">
                             <i class="${isLiked ? 'fa-solid text-rose-500' : 'fa-regular'} fa-heart"></i>
-                        </button>
-                        <button onclick="playTrack(${idx})" class="w-8 h-8 rounded-full bg-slate-800 group-hover:bg-indigo-600 text-slate-300 group-hover:text-white flex items-center justify-center transition">
-                            <i class="fa-solid fa-play text-xs ml-0.5"></i>
                         </button>
                     </div>
                 </div>`;
@@ -326,138 +211,75 @@
             currentIndex = index;
             const track = currentTracks[index];
             if (!track) return;
-
-            audio.src = track.previewUrl;
-            audio.play();
-
+            audio.src = track.previewUrl; audio.play();
             document.getElementById('nowPlayingArt').src = track.artworkUrl100;
             document.getElementById('nowPlayingTitle').innerText = track.trackName;
-            document.getElementById('nowPlayingArtist').innerText = track.artistName;
-            document.getElementById('nowPlayingAlbum').innerText = track.collectionName || 'Single';
-
             document.getElementById('dockArt').src = track.artworkUrl100;
             document.getElementById('dockTitle').innerText = track.trackName;
-            document.getElementById('dockArtist').innerText = track.artistName;
-
             playIcon.className = 'fa-solid fa-pause text-sm';
-            updateLikeButtonState(track);
-            generateSimulatedLyrics(track.trackName);
+            
+            // Call Lyrics API
+            fetchLyrics(track.artistName, track.trackName);
+        }
+
+        async function fetchLyrics(artist, title) {
+            const container = document.getElementById('lyricsContainer');
+            container.innerHTML = `<div class="mt-10"><i class="fa-solid fa-spinner fa-spin text-2xl text-indigo-500 mb-3 block"></i><p class="text-indigo-400 font-semibold animate-pulse">Finding lyrics...</p></div>`;
+            try {
+                // Clean strings for better API matching
+                const cleanTitle = title.split(' (')[0].split(' - ')[0];
+                const cleanArtist = artist.split(' & ')[0];
+                
+                const res = await fetch(`https://api.lyrics.ovh/v1/${cleanArtist}/${cleanTitle}`);
+                if (!res.ok) throw new Error('Not found');
+                const data = await res.json();
+                
+                if (data.lyrics) {
+                    const formatted = data.lyrics.replace(/\n/g, '<br>');
+                    container.innerHTML = `<div class="text-slate-200 leading-loose pb-8 text-center">${formatted}</div>`;
+                } else {
+                    throw new Error('Empty');
+                }
+            } catch (err) {
+                container.innerHTML = `
+                    <p class="text-indigo-400 font-semibold mb-4 mt-10">♪ ${title} ♪</p>
+                    <p class="text-slate-400 italic">Real-time lyrics not available for this specific track.</p>
+                `;
+            }
         }
 
         function toggleLike(track) {
             const idx = likedTracks.findIndex(t => t.trackId === track.trackId);
-            if (idx > -1) {
-                likedTracks.splice(idx, 1);
-            } else {
-                likedTracks.push(track);
-            }
+            if (idx > -1) likedTracks.splice(idx, 1);
+            else likedTracks.push(track);
             localStorage.setItem('echoes_liked', JSON.stringify(likedTracks));
             renderSongs(currentTracks, songsList);
-            if (currentTracks[currentIndex]) updateLikeButtonState(currentTracks[currentIndex]);
-        }
-
-        function toggleLikeCurrent() {
-            if (currentTracks[currentIndex]) {
-                toggleLike(currentTracks[currentIndex]);
-            }
-        }
-
-        function updateLikeButtonState(track) {
-            const isLiked = likedTracks.some(t => t.trackId === track.trackId);
-            const btn = document.getElementById('likeTrackBtn');
-            btn.innerHTML = `<i class="${isLiked ? 'fa-solid text-rose-500' : 'fa-regular'} fa-heart"></i>`;
-        }
-
-        function renderLikedSongs() {
-            renderSongs(likedTracks, likedSongsList);
-        }
-
-        function clearLiked() {
-            likedTracks = [];
-            localStorage.removeItem('echoes_liked');
-            renderLikedSongs();
-        }
-
-        // Sleep Timer
-        function setSleepTimer(mins) {
-            clearSleepTimer();
-            const ms = mins * 60 * 1000;
-            document.getElementById('timerStatus').innerText = `Sleep timer set for ${mins} minutes.`;
-            sleepTimerTimeout = setTimeout(() => {
-                audio.pause();
-                playIcon.className = 'fa-solid fa-play text-sm ml-0.5';
-                document.getElementById('timerStatus').innerText = 'Audio paused by sleep timer.';
-            }, ms);
-        }
-
-        function clearSleepTimer() {
-            if (sleepTimerTimeout) clearTimeout(sleepTimerTimeout);
-            document.getElementById('timerStatus').innerText = 'Sleep timer cancelled.';
-        }
-
-        // Live Simulated Lyrics
-        function generateSimulatedLyrics(title) {
-            const container = document.getElementById('lyricsContainer');
-            container.innerHTML = `
-                <p class="text-indigo-400 font-semibold mb-2">♪ Now playing: ${title} ♪</p>
-                <p class="text-slate-400">Feeling the rhythm flow...</p>
-                <p class="text-slate-200 font-medium">Echoes in the dark night...</p>
-                <p class="text-slate-400">Melodies playing on loop...</p>
-                <p class="text-slate-400">Let the music take control...</p>
-            `;
         }
 
         playBtn.addEventListener('click', () => {
             if (!audio.src) return;
-            if (audio.paused) {
-                audio.play();
-                playIcon.className = 'fa-solid fa-pause text-sm';
-            } else {
-                audio.pause();
-                playIcon.className = 'fa-solid fa-play text-sm ml-0.5';
-            }
+            if (audio.paused) { audio.play(); playIcon.className = 'fa-solid fa-pause text-sm'; }
+            else { audio.pause(); playIcon.className = 'fa-solid fa-play text-sm ml-0.5'; }
         });
 
         audio.addEventListener('timeupdate', () => {
-            if (audio.duration) {
-                progressBar.value = (audio.currentTime / audio.duration) * 100;
-                currentTimeEl.innerText = formatTime(audio.currentTime);
-                durationEl.innerText = formatTime(audio.duration);
-            }
+            if (audio.duration) progressBar.value = (audio.currentTime / audio.duration) * 100;
         });
+        progressBar.addEventListener('input', () => { if (audio.duration) audio.currentTime = (progressBar.value / 100) * audio.duration; });
+        document.getElementById('volumeSlider').addEventListener('input', (e) => audio.volume = e.target.value);
 
-        progressBar.addEventListener('input', () => {
-            if (audio.duration) {
-                audio.currentTime = (progressBar.value / 100) * audio.duration;
-            }
-        });
-
-        document.getElementById('volumeSlider').addEventListener('input', (e) => {
-            audio.volume = e.target.value;
-        });
-
-        function formatTime(sec) {
-            const m = Math.floor(sec / 60);
-            const s = Math.floor(sec % 60);
-            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        function executeSearch(query) {
+            if (query) { fetchSongs(query); searchInput.value = query; mobileSearchInput.value = query; }
         }
-
+        
         [searchInput, mobileSearchInput].forEach(input => {
-            input.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter' && input.value.trim()) {
-                    fetchSongs(input.value.trim());
-                    if(searchInput.value) mobileSearchInput.value = searchInput.value;
-                }
+            input.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.keyCode === 13) { e.preventDefault(); executeSearch(input.value.trim()); }
             });
         });
 
-        document.getElementById('prevBtn').addEventListener('click', () => {
-            if (currentIndex > 0) playTrack(currentIndex - 1);
-        });
-
-        document.getElementById('nextBtn').addEventListener('click', () => {
-            if (currentIndex < currentTracks.length - 1) playTrack(currentIndex + 1);
-        });
+        document.getElementById('deskSearchBtn').addEventListener('click', () => executeSearch(searchInput.value.trim()));
+        document.getElementById('mobSearchBtn').addEventListener('click', () => executeSearch(mobileSearchInput.value.trim()));
 
         // Visualizer Canvas Animation
         const canvas = document.getElementById('visualizer');
@@ -475,8 +297,7 @@
         }
         drawVisualizer();
 
-        // Initial fetch
-        fetchSongs('Arijit Singh');
+        fetchSongs('The Weeknd');
     </script>
 </body>
 </html>

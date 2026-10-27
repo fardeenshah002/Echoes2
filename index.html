@@ -408,8 +408,7 @@
                 let res = await fetch(`https://api.lyrics.ovh/v1/${a.split(' & ')[0]}/${t.split(' (')[0]}`);
                 if(!res.ok) throw new Error('404');
                 let data = await res.json();
-                if(data.lyrics) c.innerHTML = data.lyrics.split('
-').filter(l=>l.trim()).map(l=>`<p class="lyric-inactive py-2 font-bold text-xl cursor-pointer">${l}</p>`).join('');
+                if(data.lyrics) c.innerHTML = data.lyrics.split('\n').filter(l=>l.trim()).map(l=>`<p class="lyric-inactive py-2 font-bold text-xl cursor-pointer">${l}</p>`).join('');
                 else throw new Error('Empty');
             } catch(e) { c.innerHTML = `<p class="text-gray-500">Lyrics unavailable</p>`; }
         }

@@ -1,0 +1,969 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ECHOES - Premium Space Theme</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;700;800&display=swap');
+        
+        :root {
+            --bg-base: #0B0B13;
+            --bg-surface: #151522;
+            --bg-elevated: #1F1F33;
+            --accent: #00F0FF;
+            --accent-glow: rgba(0, 240, 255, 0.4);
+            --text-main: #FFFFFF;
+            --text-muted: #8E8EA0;
+        }
+
+        body { 
+            font-family: 'Plus Jakarta Sans', sans-serif; 
+            background-color: var(--bg-base); 
+            color: var(--text-main); 
+            overscroll-behavior-y: none; 
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        /* Explicitly defining utility classes for backgrounds to prevent transparency bugs */
+        .bg-base { background-color: var(--bg-base); }
+        .bg-surface { background-color: var(--bg-surface); }
+        .bg-elevated { background-color: var(--bg-elevated); border: 1px solid rgba(255,255,255,0.05); }
+        .text-muted { color: var(--text-muted); }
+        
+        /* Hide scrollbars */
+        ::-webkit-scrollbar { display: none; }
+        * { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Full Player Transitions */
+        #fullPlayer, #view-search { transition: transform 0.5s cubic-bezier(0.32, 0.72, 0, 1); }
+        .player-open { transform: translateY(0%); }
+        .player-closed { transform: translateY(100%); }
+
+        /* Custom Range Slider */
+        input[type=range] { -webkit-appearance: none; background: transparent; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 16px; width: 16px; border-radius: 50%; background: var(--accent); cursor: pointer; margin-top: -6px; box-shadow: 0 0 12px var(--accent-glow); transition: transform 0.1s; }
+        input[type=range]:active::-webkit-slider-thumb { transform: scale(1.3); }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 4px; cursor: pointer; background: rgba(255,255,255,0.1); border-radius: 2px; }
+        
+        /* Lyrics Styling */
+        .lyric-active { color: var(--accent); font-size: 1.4rem; font-weight: 800; transition: all 0.4s ease; text-shadow: 0 0 20px var(--accent-glow); transform: scale(1.05); }
+        .lyric-inactive { color: rgba(255,255,255,0.3); font-weight: 500; font-size: 1.1rem; transition: all 0.4s ease; }
+
+        .chip { background: var(--bg-surface); border: 1px solid rgba(255,255,255,0.1); transition: all 0.2s; }
+        .chip.active { background: var(--bg-elevated); border-color: var(--accent); }
+        
+        .nav-item.active { color: var(--accent); }
+        .nav-item { color: var(--text-muted); transition: color 0.2s; }
+
+        /* Floating Mini Player */
+        #miniPlayer {
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.5), 0 0 20px rgba(0, 240, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+    </style>
+</head>
+<body class="flex flex-col h-screen w-full overflow-hidden select-none">
+
+    <!-- Custom Toast Notification -->
+    <div id="toast" class="fixed top-5 left-1/2 -translate-x-1/2 bg-[#00F0FF] text-black px-6 py-3 rounded-full font-bold shadow-[0_0_20px_rgba(0,240,255,0.4)] transition-transform duration-300 transform -translate-y-24 z-[100] text-sm whitespace-nowrap">
+        Message
+    </div>
+
+    <!-- Top Navbar -->
+    <header class="flex items-center justify-between px-6 py-5 shrink-0 bg-[#0B0B13] z-10">
+        <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-[#00F0FF] to-[#0055FF] flex items-center justify-center shadow-[0_0_15px_rgba(0,240,255,0.3)]">
+                <i class="fa-solid fa-compact-disc text-white text-lg fa-spin-pulse" style="--fa-animation-duration: 3s;"></i>
+            </div>
+            <h1 class="text-2xl font-extrabold tracking-tight">ECHOES</h1>
+        </div>
+        <button class="w-10 h-10 rounded-full bg-surface flex items-center justify-center text-muted hover:text-white transition" onclick="openSearch()">
+            <i class="fa-solid fa-magnifying-glass text-lg"></i>
+        </button>
+    </header>
+
+    <!-- Main Content Wrapper (Fixed Scrolling) -->
+    <main class="flex-1 overflow-y-auto relative pb-[160px] bg-[#0B0B13]" id="mainScrollArea">
+        
+        <!-- === HOME VIEW === -->
+        <div id="view-home" class="w-full pb-10">
+            <!-- Mood Chips -->
+            <div class="flex gap-3 px-6 py-2 overflow-x-auto whitespace-nowrap sticky top-0 bg-[#0B0B13]/95 backdrop-blur-md z-10 pb-4">
+                <button class="chip active px-5 py-2 rounded-full text-sm font-semibold text-white" onclick="changeMood('Focus Study', this)">Focus</button>
+                <button class="chip px-5 py-2 rounded-full text-sm font-semibold text-white" onclick="changeMood('Workout Gym', this)">Energy</button>
+                <button class="chip px-5 py-2 rounded-full text-sm font-semibold text-white" onclick="changeMood('Relax Chill Lofi', this)">Relax</button>
+                <button class="chip px-5 py-2 rounded-full text-sm font-semibold text-white" onclick="changeMood('Pop Roadtrip', this)">Commute</button>
+            </div>
+
+            <div class="mt-4 px-6 space-y-10">
+                <div>
+                    <h2 class="text-2xl font-extrabold mb-1">Made for You</h2>
+                    <p id="homeSubtitle" class="text-muted text-sm mb-5">Curated mixes based on your mood</p>
+                    <div class="flex gap-5 overflow-x-auto pb-6" id="homeRow1"></div>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-extrabold mb-5">Global Top Hits</h2>
+                    <div class="flex gap-5 overflow-x-auto pb-6" id="homeRow2"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- === EXPLORE VIEW === -->
+        <div id="view-explore" class="w-full hidden px-6 pt-2 pb-10">
+            <h2 class="text-2xl font-extrabold mb-6">Discover</h2>
+            <div class="grid grid-cols-2 gap-4 mb-8">
+                <div onclick="loadExplore('Viral Now', 'Viral TikTok Songs')" class="bg-surface p-4 rounded-2xl flex flex-col gap-2 cursor-pointer hover:bg-elevated transition border border-transparent hover:border-[#00F0FF]">
+                    <i class="fa-solid fa-fire text-2xl text-orange-500"></i>
+                    <span class="font-bold">Viral Now</span>
+                </div>
+                <div onclick="loadExplore('New Releases', '2024 Pop Hits')" class="bg-surface p-4 rounded-2xl flex flex-col gap-2 cursor-pointer hover:bg-elevated transition border border-transparent hover:border-[#00F0FF]">
+                    <i class="fa-solid fa-bolt text-2xl text-yellow-400"></i>
+                    <span class="font-bold">New Drops</span>
+                </div>
+                <div onclick="loadExplore('Lofi Study', 'Lofi Hip Hop Chill')" class="bg-surface p-4 rounded-2xl flex flex-col gap-2 cursor-pointer hover:bg-elevated transition border border-transparent hover:border-[#00F0FF]">
+                    <i class="fa-solid fa-mug-hot text-2xl text-blue-400"></i>
+                    <span class="font-bold">Lofi Study</span>
+                </div>
+                <div onclick="loadExplore('Gym Heavy', 'Gym Phonk Workout')" class="bg-surface p-4 rounded-2xl flex flex-col gap-2 cursor-pointer hover:bg-elevated transition border border-transparent hover:border-[#00F0FF]">
+                    <i class="fa-solid fa-dumbbell text-2xl text-red-500"></i>
+                    <span class="font-bold">Gym Heavy</span>
+                </div>
+            </div>
+            
+            <div class="bg-surface rounded-3xl p-5 min-h-[300px]">
+                <div id="exploreContent" class="space-y-3">
+                    <div class="text-center py-10 text-muted">Click a category above to load tracks...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- === LIBRARY VIEW === -->
+        <div id="view-library" class="w-full hidden px-6 pt-2 pb-10">
+            <div class="flex items-center justify-between mb-8">
+                <h2 class="text-2xl font-extrabold">Your Space</h2>
+                <button onclick="showCreatePlaylistModal()" class="text-sm font-bold text-black bg-[#00F0FF] hover:bg-white transition px-5 py-2.5 rounded-full shadow-[0_0_15px_rgba(0,240,255,0.4)]">
+                    <i class="fa-solid fa-plus mr-1"></i> New
+                </button>
+            </div>
+            
+            <!-- Main Library List -->
+            <div id="libraryPlaylists" class="space-y-4"></div>
+
+            <!-- Inside Playlist View (Hidden by default) -->
+            <div id="playlistDetail" class="hidden flex-col">
+                <!-- Header -->
+                <div class="flex items-center gap-4 mb-6 sticky top-0 bg-[#0B0B13] py-2 z-10">
+                    <button class="w-10 h-10 rounded-full bg-surface flex items-center justify-center hover:text-[#00F0FF] transition" onclick="closePlaylistView()">
+                        <i class="fa-solid fa-arrow-left"></i>
+                    </button>
+                    <h3 class="text-2xl font-extrabold" id="playlistDetailTitle">Playlist</h3>
+                </div>
+                <!-- Tracks -->
+                <div id="playlistDetailTracks" class="space-y-2"></div>
+            </div>
+        </div>
+    </main>
+
+    <!-- === SEARCH OVERLAY (Fixed Pure Black Background) === -->
+    <div id="view-search" class="fixed inset-0 bg-[#0B0B13] z-[60] hidden flex-col player-closed">
+        <div class="flex items-center gap-4 px-6 py-5 bg-surface shrink-0 border-b border-[rgba(255,255,255,0.05)]">
+            <button class="w-10 h-10 shrink-0 rounded-full bg-elevated flex items-center justify-center hover:text-[#00F0FF] transition" onclick="closeSearch()">
+                <i class="fa-solid fa-arrow-left"></i>
+            </button>
+            <input type="text" id="searchInput" placeholder="Search tracks, artists..." class="w-full bg-transparent outline-none text-white text-lg placeholder-gray-500 font-medium" autofocus>
+        </div>
+        <div class="flex-1 overflow-y-auto px-6 py-4 pb-20" id="searchResults">
+            <div class="text-center mt-20">
+                <i class="fa-solid fa-magnifying-glass text-4xl text-muted mb-4 opacity-50"></i>
+                <p class="text-muted font-medium">Find your next favorite song</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Mini Player -->
+    <div id="miniPlayer" class="fixed bottom-[76px] left-4 right-4 h-16 bg-surface/90 rounded-2xl flex flex-col justify-between cursor-pointer z-30 overflow-hidden border border-[rgba(255,255,255,0.1)]" onclick="if(event.target.tagName !== 'BUTTON' && event.target.tagName !== 'I') toggleFullPlayer()">
+        <div class="flex-1 flex items-center justify-between px-3 w-full h-full">
+            <div class="flex items-center gap-3 overflow-hidden flex-1">
+                <img id="miniArt" src="https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=100" class="w-10 h-10 object-cover rounded-lg shadow-md">
+                <div class="overflow-hidden whitespace-nowrap">
+                    <p id="miniTitle" class="text-sm font-bold text-white truncate">ECHOES Ready</p>
+                    <p id="miniArtist" class="text-xs text-muted truncate">Select a track</p>
+                </div>
+            </div>
+            <div class="flex items-center gap-3 shrink-0 ml-2">
+                <button class="w-10 h-10 flex items-center justify-center text-white hover:text-[#00F0FF] text-xl transition" onclick="event.stopPropagation(); togglePlay();">
+                    <i id="miniPlayIcon" class="fa-solid fa-play ml-1"></i>
+                </button>
+                <button class="w-10 h-10 flex items-center justify-center text-white hover:text-[#00F0FF] text-lg transition" onclick="event.stopPropagation(); nextTrack();">
+                    <i class="fa-solid fa-forward-step"></i>
+                </button>
+            </div>
+        </div>
+        <!-- Progress line -->
+        <div class="w-full h-[3px] bg-[rgba(255,255,255,0.1)] absolute bottom-0 left-0">
+            <div id="miniProgress" class="h-full bg-[#00F0FF] w-0 shadow-[0_0_10px_#00F0FF]"></div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation Bar -->
+    <nav class="fixed bottom-0 left-0 right-0 h-[64px] bg-[#0B0B13]/90 backdrop-blur-xl border-t border-[rgba(255,255,255,0.05)] flex justify-around items-center z-20 px-2 pb-2">
+        <div class="nav-item active flex flex-col items-center gap-1 cursor-pointer w-1/3 py-2 rounded-xl hover:bg-surface transition" onclick="switchNav('home', this)">
+            <i class="fa-solid fa-house text-xl mb-0.5"></i>
+            <span class="text-[11px] font-bold tracking-wide">Home</span>
+        </div>
+        <div class="nav-item flex flex-col items-center gap-1 cursor-pointer w-1/3 py-2 rounded-xl hover:bg-surface transition" onclick="switchNav('explore', this)">
+            <i class="fa-solid fa-compass text-xl mb-0.5"></i>
+            <span class="text-[11px] font-bold tracking-wide">Explore</span>
+        </div>
+        <div class="nav-item flex flex-col items-center gap-1 cursor-pointer w-1/3 py-2 rounded-xl hover:bg-surface transition" onclick="switchNav('library', this)">
+            <i class="fa-solid fa-layer-group text-xl mb-0.5"></i>
+            <span class="text-[11px] font-bold tracking-wide">Library</span>
+        </div>
+    </nav>
+
+    <!-- ================= FULL SCREEN PLAYER ================= -->
+    <div id="fullPlayer" class="fixed inset-0 bg-[#0B0B13] z-[70] player-closed flex flex-col">
+        <!-- Dynamic Background Blur -->
+        <div class="absolute inset-0 z-0 opacity-30">
+            <img id="fullBgBlur" src="https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=100" class="w-full h-full object-cover blur-[80px]">
+            <div class="absolute inset-0 bg-[#0B0B13]/70"></div>
+        </div>
+
+        <!-- Top Bar -->
+        <div class="flex items-center justify-between px-6 py-5 shrink-0 z-10">
+            <button class="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center hover:bg-black/60 transition" onclick="toggleFullPlayer()">
+                <i class="fa-solid fa-chevron-down text-xl"></i>
+            </button>
+            <div class="flex flex-col items-center bg-black/40 backdrop-blur-md px-4 py-1 rounded-full">
+                <span class="text-[10px] text-muted font-bold tracking-widest uppercase">Playing From</span>
+                <span class="text-xs font-bold truncate max-w-[150px]" id="fullContext">ECHOES</span>
+            </div>
+            <button class="w-10 h-10 rounded-full bg-black/40 backdrop-blur-md flex items-center justify-center hover:bg-black/60 transition" onclick="showPlaylistSelectorModal()">
+                <i class="fa-solid fa-plus text-lg"></i>
+            </button>
+        </div>
+
+        <!-- Scrollable content area -->
+        <div class="flex-1 flex flex-col overflow-hidden relative z-10">
+            
+            <!-- Default View: Artwork & Controls -->
+            <div id="playerMainView" class="absolute inset-0 flex flex-col px-8 pb-8 pt-4 overflow-y-auto">
+                <!-- Art -->
+                <div class="w-full max-w-sm mx-auto aspect-square rounded-3xl overflow-hidden shadow-[0_20px_50px_rgba(0,0,0,0.5)] mb-10 mt-auto border border-[rgba(255,255,255,0.1)]">
+                    <img id="fullArt" src="https://images.unsplash.com/photo-1614680376573-df3480f0c6ff?w=600" class="w-full h-full object-cover transition-transform duration-700 hover:scale-110">
+                </div>
+
+                <!-- Info Row -->
+                <div class="flex items-center justify-between mb-8 max-w-sm mx-auto w-full">
+                    <div class="overflow-hidden pr-4 flex-1">
+                        <h2 id="fullTitle" class="text-3xl font-extrabold text-white truncate mb-1">Select a song</h2>
+                        <p id="fullArtist" class="text-lg text-muted truncate font-medium">Play something to start</p>
+                    </div>
+                    <button class="w-12 h-12 flex items-center justify-center text-2xl transition" onclick="toggleLikeCurrent()">
+                        <i id="likeBtn" class="fa-regular fa-heart text-muted hover:text-[#00F0FF]"></i>
+                    </button>
+                </div>
+
+                <!-- Scrubber -->
+                <div class="max-w-sm mx-auto w-full mb-8">
+                    <input type="range" id="progressBar" min="0" max="100" value="0" class="w-full">
+                    <div class="flex justify-between text-xs text-muted font-bold mt-3">
+                        <span id="currentTime">0:00</span>
+                        <span id="duration">0:00</span>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="flex items-center justify-between max-w-sm mx-auto w-full mb-6">
+                    <button onclick="toggleShuffle()" class="text-xl p-2 transition text-muted hover:text-[#00F0FF]" id="shuffleBtn"><i class="fa-solid fa-shuffle"></i></button>
+                    <button onclick="prevTrack()" class="text-3xl text-white hover:text-[#00F0FF] transition p-2"><i class="fa-solid fa-backward-step"></i></button>
+                    
+                    <button class="w-20 h-20 rounded-full bg-[#00F0FF] text-black flex items-center justify-center hover:scale-105 transition transform shadow-[0_0_20px_rgba(0,240,255,0.4)]" onclick="togglePlay()">
+                        <i id="fullPlayIcon" class="fa-solid fa-play text-3xl ml-1"></i>
+                    </button>
+                    
+                    <button onclick="nextTrack()" class="text-3xl text-white hover:text-[#00F0FF] transition p-2"><i class="fa-solid fa-forward-step"></i></button>
+                    <button onclick="toggleLoop()" class="text-xl p-2 transition text-muted hover:text-[#00F0FF]" id="loopBtn"><i class="fa-solid fa-repeat"></i></button>
+                </div>
+            </div>
+
+            <!-- Tab View: UP NEXT -->
+            <div id="playerUpNextView" class="absolute inset-0 bg-[#0B0B13]/90 backdrop-blur-xl hidden flex-col px-6 pt-6 overflow-y-auto pb-24">
+                <h3 class="text-xl font-extrabold mb-6">Up Next</h3>
+                <div id="queueList" class="space-y-2">
+                    <p class="text-muted italic">Play a track to generate queue...</p>
+                </div>
+            </div>
+
+            <!-- Tab View: LYRICS -->
+            <div id="playerLyricsView" class="absolute inset-0 bg-[#0B0B13]/90 backdrop-blur-xl hidden flex-col px-8 pt-6 overflow-y-auto pb-32">
+                <h3 class="text-xl font-extrabold mb-6 sticky top-0 py-2 bg-[#0B0B13]/90 backdrop-blur z-10">Live Lyrics</h3>
+                <div id="lyricsContainer" class="flex flex-col gap-8 pb-40">
+                    <p class="text-muted text-lg text-center mt-20 font-medium">Lyrics will appear here</p>
+                </div>
+            </div>
+
+            <!-- Tab View: EQUALIZER -->
+            <div id="playerEqView" class="absolute inset-0 bg-[#0B0B13]/90 backdrop-blur-xl hidden flex-col px-8 pt-6 overflow-y-auto pb-24">
+                <h3 class="text-xl font-extrabold mb-8">Studio FX</h3>
+                
+                <div class="bg-surface rounded-3xl p-6 mb-8 border border-[rgba(255,255,255,0.05)] shadow-xl">
+                    <canvas id="visualizer" class="w-full h-32 rounded-xl bg-black"></canvas>
+                </div>
+                
+                <div class="space-y-8 max-w-sm mx-auto w-full bg-surface p-8 rounded-3xl border border-[rgba(255,255,255,0.05)] shadow-xl">
+                    <div>
+                        <label class="flex justify-between text-sm font-bold text-muted mb-4 uppercase tracking-wider"><span>Bass</span></label>
+                        <input type="range" min="-20" max="20" value="0" class="w-full">
+                    </div>
+                    <div>
+                        <label class="flex justify-between text-sm font-bold text-muted mb-4 uppercase tracking-wider"><span>Mid</span></label>
+                        <input type="range" min="-20" max="20" value="0" class="w-full">
+                    </div>
+                    <div>
+                        <label class="flex justify-between text-sm font-bold text-muted mb-4 uppercase tracking-wider"><span>Treble</span></label>
+                        <input type="range" min="-20" max="20" value="0" class="w-full">
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Bottom Tabs for Full Player -->
+        <div class="flex items-center justify-around px-2 py-4 bg-surface shrink-0 z-20 rounded-t-3xl border-t border-[rgba(255,255,255,0.05)] pb-6">
+            <button class="player-tab active-tab bg-elevated text-white px-6 py-2.5 rounded-full text-sm font-bold transition shadow-md" onclick="switchPlayerTab('main', this)">Player</button>
+            <button class="player-tab text-muted hover:text-white px-6 py-2.5 rounded-full text-sm font-bold transition" onclick="switchPlayerTab('upnext', this)">Queue</button>
+            <button class="player-tab text-muted hover:text-white px-6 py-2.5 rounded-full text-sm font-bold transition" onclick="switchPlayerTab('lyrics', this)">Lyrics</button>
+            <button class="player-tab text-muted hover:text-white px-6 py-2.5 rounded-full text-sm font-bold transition" onclick="switchPlayerTab('eq', this)">FX</button>
+        </div>
+    </div>
+
+    <!-- Create Playlist Modal -->
+    <div id="createPlaylistModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-[80] flex items-center justify-center p-4">
+        <div class="bg-[#151522] rounded-3xl p-6 w-full max-w-sm border border-[rgba(255,255,255,0.1)] shadow-2xl">
+            <h3 class="text-xl font-extrabold mb-4 text-center text-white">New Playlist</h3>
+            <input type="text" id="newPlaylistInput" placeholder="Enter name (e.g. Chill Vibes)" class="w-full bg-[#1F1F33] border border-[rgba(255,255,255,0.1)] rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00F0FF] mb-6 font-medium">
+            <div class="flex gap-3">
+                <button onclick="closeCreatePlaylistModal()" class="flex-1 bg-[#1F1F33] hover:bg-white/10 text-white py-3 rounded-xl font-bold transition">Cancel</button>
+                <button onclick="submitNewPlaylist()" class="flex-1 bg-[#00F0FF] text-black py-3 rounded-xl font-extrabold transition shadow-[0_0_15px_rgba(0,240,255,0.3)]">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add to Playlist Modal (From Player) -->
+    <div id="addToPlaylistModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm hidden z-[80] flex flex-col justify-end">
+        <div class="bg-[#151522] rounded-t-3xl p-6 w-full max-h-[70vh] flex flex-col border-t border-[rgba(255,255,255,0.1)]">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-xl font-extrabold text-white">Save to...</h3>
+                <button class="w-8 h-8 rounded-full bg-[#1F1F33] flex items-center justify-center text-muted hover:text-white transition" onclick="closePlaylistSelectorModal()">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <div id="modalPlaylistList" class="flex-1 overflow-y-auto space-y-2 pr-2"></div>
+        </div>
+    </div>
+
+    <audio id="audioPlayer" crossorigin="anonymous"></audio>
+
+    <script>
+        // DOM Elements
+        const audio = document.getElementById('audioPlayer');
+        const progressBar = document.getElementById('progressBar');
+        const miniProgress = document.getElementById('miniProgress');
+        const searchInput = document.getElementById('searchInput');
+        const songsList = document.getElementById('searchResults');
+        
+        let currentTracks = []; 
+        let autoQueue = []; 
+        let currentIndex = 0;
+        let isQueuePlaying = false;
+        let activeTrack = null;
+        
+        // Settings State
+        let isShuffle = false;
+        let isLoop = false;
+
+        // Data Storage
+        let customPlaylists = JSON.parse(localStorage.getItem('echoes_pro_playlists') || '{"Liked Songs": []}');
+        // Smart Play History Limit to 10 unique artists
+        let playHistory = JSON.parse(localStorage.getItem('echoes_pro_history') || '[]');
+
+        // --- CUSTOM TOAST NOTIFICATION ---
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.style.transform = 'translate(-50%, 0)';
+            setTimeout(() => { toast.style.transform = 'translate(-50%, -6rem)'; }, 3000);
+        }
+
+        // --- SMART RECOMMENDATION HISTORY ---
+        function updatePlayHistory(artistName) {
+            if (!artistName) return;
+            // Remove if exists to bring to front
+            playHistory = playHistory.filter(a => a !== artistName);
+            playHistory.unshift(artistName);
+            if (playHistory.length > 10) playHistory.pop();
+            localStorage.setItem('echoes_pro_history', JSON.stringify(playHistory));
+        }
+
+        // --- MOOD CHIPS LOGIC ---
+        async function changeMood(query, el) {
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            el.classList.add('active');
+            
+            // Adjust subtitle based on mood selected
+            document.getElementById('homeSubtitle').innerText = `Curated mixes for ${query.split(' ')[0]}`;
+            
+            const container = document.getElementById('homeRow1');
+            container.innerHTML = `<div class="w-full text-center py-8"><i class="fa-solid fa-circle-notch fa-spin text-2xl text-[#00F0FF]"></i></div>`;
+            
+            const recs = await fetchAPI(query, 10);
+            renderHorizontalList(recs, 'homeRow1');
+        }
+
+        // --- NAVIGATION & VIEWS ---
+        function switchNav(viewId, el) {
+            document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+            el.classList.add('active');
+            
+            ['home', 'explore', 'library'].forEach(v => {
+                document.getElementById(`view-${v}`).classList.add('hidden');
+            });
+            document.getElementById(`view-${viewId}`).classList.remove('hidden');
+            
+            if(viewId === 'library') {
+                closePlaylistView();
+                renderLibrary();
+            }
+        }
+
+        function openSearch() {
+            const overlay = document.getElementById('view-search');
+            overlay.classList.remove('hidden', 'player-closed');
+            overlay.classList.add('flex', 'player-open');
+            setTimeout(() => searchInput.focus(), 100);
+        }
+        function closeSearch() {
+            const overlay = document.getElementById('view-search');
+            overlay.classList.add('player-closed');
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex', 'player-open');
+                searchInput.value = '';
+            }, 300); // match transition
+        }
+
+        function toggleFullPlayer() {
+            const player = document.getElementById('fullPlayer');
+            if(player.classList.contains('player-closed')) {
+                player.classList.remove('player-closed');
+                player.classList.add('player-open');
+                drawVisualizer();
+            } else {
+                player.classList.add('player-closed');
+                player.classList.remove('player-open');
+            }
+        }
+
+        function switchPlayerTab(tab, el) {
+            document.querySelectorAll('.player-tab').forEach(btn => {
+                btn.classList.remove('bg-elevated', 'text-white', 'shadow-md');
+                btn.classList.add('text-muted');
+            });
+            el.classList.add('bg-elevated', 'text-white', 'shadow-md');
+            el.classList.remove('text-muted');
+
+            ['main', 'upnext', 'lyrics', 'eq'].forEach(v => {
+                let viewId = v === 'main' ? 'playerMainView' : 
+                             v === 'upnext' ? 'playerUpNextView' : 
+                             v === 'lyrics' ? 'playerLyricsView' : 'playerEqView';
+                document.getElementById(viewId).classList.add('hidden');
+                document.getElementById(viewId).classList.remove('flex');
+            });
+            
+            let targetId = tab === 'main' ? 'playerMainView' : 
+                           tab === 'upnext' ? 'playerUpNextView' : 
+                           tab === 'lyrics' ? 'playerLyricsView' : 'playerEqView';
+            document.getElementById(targetId).classList.remove('hidden');
+            document.getElementById(targetId).classList.add('flex');
+        }
+
+        // --- DATA FETCHING ---
+        async function fetchAPI(query, limit = 15) {
+            try {
+                const res = await fetch(`https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&limit=${limit}`);
+                const data = await res.json();
+                return data.results.filter(item => item.previewUrl);
+            } catch (err) {
+                console.error(err);
+                return [];
+            }
+        }
+
+        async function initHome() {
+            let query1 = 'Focus Study';
+            let subtitleText = "Curated mixes based on your mood";
+
+            // Apply Smart Recommendation if history exists
+            if (playHistory.length > 0) {
+                query1 = playHistory[0]; // Last played artist
+                subtitleText = `Inspired by your interest in ${query1}`;
+                document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            }
+            
+            document.getElementById('homeSubtitle').innerText = subtitleText;
+
+            const recs = await fetchAPI(query1, 10);
+            renderHorizontalList(recs, 'homeRow1');
+            
+            const trends = await fetchAPI('Global Top 100', 10);
+            renderHorizontalList(trends, 'homeRow2');
+        }
+
+        function renderHorizontalList(tracks, containerId) {
+            const container = document.getElementById(containerId);
+            if(!tracks.length) return;
+            
+            container.innerHTML = tracks.map((track, idx) => `
+                <div class="min-w-[140px] max-w-[140px] cursor-pointer group" onclick='playFromContext(${JSON.stringify(tracks).replace(/'/g, "&apos;")}, ${idx})'>
+                    <div class="relative w-full aspect-square mb-3 overflow-hidden rounded-2xl shadow-lg border border-[rgba(255,255,255,0.05)]">
+                        <img src="${track.artworkUrl100.replace('100x100', '300x300')}" class="w-full h-full object-cover group-hover:scale-110 transition duration-500">
+                        <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition duration-300">
+                            <i class="fa-solid fa-play text-white text-3xl shadow-xl"></i>
+                        </div>
+                    </div>
+                    <p class="text-[13px] font-bold text-white truncate">${track.trackName}</p>
+                    <p class="text-[11px] text-muted truncate mt-1 font-medium">${track.artistName}</p>
+                </div>
+            `).join('');
+        }
+
+        function playFromContext(tracksArray, index) {
+            currentTracks = tracksArray;
+            isQueuePlaying = false;
+            playTrack(index);
+        }
+
+        // --- EXPLORE LOGIC ---
+        async function loadExplore(title, query) {
+            const container = document.getElementById('exploreContent');
+            container.innerHTML = `<div class="text-center py-10"><i class="fa-solid fa-circle-notch fa-spin text-3xl text-[#00F0FF]"></i><p class="text-muted mt-4 font-medium">Fetching ${title}...</p></div>`;
+            
+            try {
+                const results = await fetchAPI(query, 15);
+                if(!results.length) {
+                    container.innerHTML = `<p class="text-muted text-center py-10">No tracks found for ${title}.</p>`;
+                    return;
+                }
+                
+                window.tempExploreTracks = results;
+
+                container.innerHTML = `
+                    <h3 class="text-xl font-extrabold mb-4 text-white">${title}</h3>
+                    <div class="space-y-2">
+                        ${results.map((track, idx) => `
+                            <div class="flex items-center gap-4 p-3 hover:bg-elevated rounded-2xl cursor-pointer transition border border-transparent hover:border-[rgba(255,255,255,0.05)] group" onclick="playFromContext(window.tempExploreTracks, ${idx})">
+                                <div class="relative w-14 h-14 shrink-0 rounded-xl overflow-hidden">
+                                    <img src="${track.artworkUrl100}" class="w-full h-full object-cover">
+                                    <div class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition">
+                                        <i class="fa-solid fa-play text-white text-sm"></i>
+                                    </div>
+                                </div>
+                                <div class="flex-1 overflow-hidden">
+                                    <p class="text-white text-sm font-bold truncate">${track.trackName}</p>
+                                    <p class="text-muted text-xs font-medium truncate mt-0.5">${track.artistName}</p>
+                                </div>
+                                <i class="fa-solid fa-ellipsis-vertical text-muted px-2 hover:text-white transition"></i>
+                            </div>
+                        `).join('')}
+                    </div>`;
+            } catch(e) {
+                 container.innerHTML = `<p class="text-red-400 text-center py-10">Failed to load. Try again.</p>`;
+            }
+        }
+
+        // --- SEARCH LOGIC ---
+        searchInput.addEventListener('keydown', async (e) => {
+            if (e.key === 'Enter' || e.keyCode === 13) {
+                const query = searchInput.value.trim();
+                if(!query) return;
+                
+                songsList.innerHTML = `<div class="text-center py-20"><i class="fa-solid fa-circle-notch fa-spin text-4xl text-[#00F0FF] mb-4"></i></div>`;
+                
+                const results = await fetchAPI(query, 30);
+                if(!results.length) {
+                    songsList.innerHTML = `<p class="text-muted text-center mt-10 font-medium">No results found for "${query}".</p>`;
+                    return;
+                }
+                
+                window.tempSearchTracks = results;
+
+                songsList.innerHTML = results.map((track, idx) => `
+                    <div class="flex items-center gap-4 p-3 mb-2 hover:bg-surface rounded-2xl cursor-pointer transition" onclick="playFromContext(window.tempSearchTracks, ${idx}); closeSearch();">
+                        <img src="${track.artworkUrl100}" class="w-14 h-14 rounded-xl object-cover shadow-md">
+                        <div class="flex-1 overflow-hidden">
+                            <p class="text-white text-sm font-bold truncate">${track.trackName}</p>
+                            <p class="text-muted text-xs font-medium truncate mt-1">${track.artistName}</p>
+                        </div>
+                        <i class="fa-solid fa-play text-[#00F0FF] opacity-0 hover:opacity-100 p-2 transition"></i>
+                    </div>
+                `).join('');
+            }
+        });
+
+        // --- AUDIO PLAYBACK ---
+        function playTrack(index) {
+            const track = isQueuePlaying ? autoQueue[index] : currentTracks[index];
+            if (!track) return;
+            
+            activeTrack = track;
+            currentIndex = index;
+
+            audio.src = track.previewUrl; 
+            audio.loop = isLoop;
+            audio.play();
+            
+            updateUI(track);
+            checkIfLiked(track);
+            
+            // Smart Update
+            updatePlayHistory(track.artistName);
+
+            if(!isQueuePlaying) generateQueue(track.artistName);
+            fetchLyrics(track.artistName, track.trackName);
+        }
+
+        function updateUI(track) {
+            const hiRes = track.artworkUrl100.replace('100x100', '600x600');
+            
+            // Full Player UI
+            document.getElementById('fullArt').src = hiRes;
+            document.getElementById('fullBgBlur').src = hiRes; 
+            document.getElementById('fullTitle').innerText = track.trackName;
+            document.getElementById('fullArtist').innerText = track.artistName;
+            
+            // Mini Player UI
+            document.getElementById('miniArt').src = track.artworkUrl100;
+            document.getElementById('miniTitle').innerText = track.trackName;
+            document.getElementById('miniArtist').innerText = track.artistName;
+            
+            togglePlayIcons(true);
+        }
+
+        function togglePlayIcons(isPlaying) {
+            const mini = document.getElementById('miniPlayIcon');
+            const full = document.getElementById('fullPlayIcon');
+            if(isPlaying) {
+                mini.className = 'fa-solid fa-pause ml-1';
+                full.className = 'fa-solid fa-pause text-3xl';
+            } else {
+                mini.className = 'fa-solid fa-play ml-1';
+                full.className = 'fa-solid fa-play text-3xl ml-1';
+            }
+        }
+
+        function togglePlay() {
+            if(!audio.src) return;
+            if(audio.paused) {
+                audio.play(); togglePlayIcons(true);
+            } else {
+                audio.pause(); togglePlayIcons(false);
+            }
+        }
+
+        // Loop & Shuffle Actions
+        function toggleShuffle() {
+            isShuffle = !isShuffle;
+            document.getElementById('shuffleBtn').style.color = isShuffle ? '#00F0FF' : 'var(--text-muted)';
+            showToast(isShuffle ? "Shuffle On" : "Shuffle Off");
+        }
+
+        function toggleLoop() {
+            isLoop = !isLoop;
+            document.getElementById('loopBtn').style.color = isLoop ? '#00F0FF' : 'var(--text-muted)';
+            audio.loop = isLoop;
+            showToast(isLoop ? "Loop On" : "Loop Off");
+        }
+
+        function nextTrack() {
+            if(!activeTrack) return;
+            let arr = isQueuePlaying ? autoQueue : currentTracks;
+            
+            if(isShuffle) {
+                currentIndex = Math.floor(Math.random() * arr.length);
+                playTrack(currentIndex);
+            } else {
+                if (currentIndex < arr.length - 1) {
+                    playTrack(currentIndex + 1);
+                } else if (!isQueuePlaying && autoQueue.length > 0) {
+                    // Switch to queue smoothly
+                    isQueuePlaying = true;
+                    playTrack(0);
+                }
+            }
+        }
+
+        function prevTrack() {
+            if (currentIndex > 0) playTrack(currentIndex - 1);
+        }
+
+        // Timer & Progress
+        audio.addEventListener('timeupdate', () => {
+            if (audio.duration && !isNaN(audio.duration)) {
+                const percent = (audio.currentTime / audio.duration) * 100;
+                progressBar.value = percent;
+                miniProgress.style.width = `${percent}%`;
+                
+                document.getElementById('currentTime').innerText = formatTime(audio.currentTime);
+                document.getElementById('duration').innerText = formatTime(audio.duration);
+                
+                syncLyrics();
+            }
+        });
+
+        audio.addEventListener('ended', () => {
+            if(!isLoop) nextTrack();
+        });
+        
+        progressBar.addEventListener('input', () => { 
+            if (audio.duration) audio.currentTime = (progressBar.value / 100) * audio.duration; 
+        });
+
+        function formatTime(sec) {
+            if (isNaN(sec)) return "0:00";
+            const m = Math.floor(sec / 60);
+            const s = Math.floor(sec % 60);
+            return `${m}:${s < 10 ? '0' : ''}${s}`;
+        }
+
+        // --- UP NEXT (AUTO QUEUE) ---
+        async function generateQueue(artist) {
+            const qList = document.getElementById('queueList');
+            qList.innerHTML = `<div class="text-center py-10"><i class="fa-solid fa-circle-notch fa-spin text-2xl text-[#00F0FF]"></i></div>`;
+            try {
+                const res = await fetchAPI(artist, 20);
+                autoQueue = res.filter(item => item.trackId !== activeTrack?.trackId);
+                
+                if(!autoQueue.length) { qList.innerHTML = `<p class="text-muted text-sm font-medium">No similar tracks found.</p>`; return; }
+
+                qList.innerHTML = autoQueue.map((track, idx) => `
+                    <div class="flex items-center gap-4 p-3 hover:bg-elevated rounded-2xl cursor-pointer transition border border-transparent hover:border-[rgba(255,255,255,0.05)]" onclick="isQueuePlaying=true; playTrack(${idx});">
+                        <img src="${track.artworkUrl100}" class="w-12 h-12 rounded-xl object-cover">
+                        <div class="flex-1 overflow-hidden">
+                            <p class="text-white text-sm font-bold truncate">${track.trackName}</p>
+                            <p class="text-muted text-xs font-medium truncate mt-1">${track.artistName}</p>
+                        </div>
+                    </div>
+                `).join('');
+            } catch (err) {
+                qList.innerHTML = `<p class="text-red-400 text-sm">Failed to load related tracks.</p>`;
+            }
+        }
+
+        // --- LYRICS ---
+        async function fetchLyrics(artist, title) {
+            const container = document.getElementById('lyricsContainer');
+            container.innerHTML = `<div class="text-center mt-20"><i class="fa-solid fa-circle-notch fa-spin text-3xl text-[#00F0FF] mb-4"></i><p class="font-bold text-white">Loading lyrics...</p></div>`;
+            try {
+                const cleanTitle = title.split(' (')[0].split(' - ')[0];
+                const cleanArtist = artist.split(' & ')[0];
+                const res = await fetch(`https://api.lyrics.ovh/v1/${cleanArtist}/${cleanTitle}`);
+                if (!res.ok) throw new Error('Not found');
+                const data = await res.json();
+                
+                if (data.lyrics) {
+                    const lines = data.lyrics.split('\n').filter(l => l.trim() !== '');
+                    container.innerHTML = lines.map(line => `<p class="lyric-inactive py-2 cursor-pointer hover:text-white">${line}</p>`).join('');
+                } else { throw new Error('Empty'); }
+            } catch (err) {
+                container.innerHTML = `<p class="text-center text-muted text-lg mt-20 font-medium">Lyrics not available for this track.</p>`;
+            }
+        }
+
+        function syncLyrics() {
+            if(!audio.duration) return;
+            const lines = document.getElementById('lyricsContainer').querySelectorAll('p');
+            if(!lines.length || lines[0].classList.contains('text-center')) return; 
+            
+            const progress = audio.currentTime / audio.duration;
+            const activeIndex = Math.floor(progress * lines.length);
+            
+            lines.forEach((line, i) => {
+                if (i === activeIndex) {
+                    if(!line.classList.contains('lyric-active')) {
+                        line.classList.remove('lyric-inactive');
+                        line.classList.add('lyric-active');
+                        line.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                } else {
+                    line.classList.add('lyric-inactive');
+                    line.classList.remove('lyric-active');
+                }
+            });
+        }
+
+        // --- LIBRARY & PLAYLISTS ---
+        function checkIfLiked(track) {
+            const isLiked = customPlaylists["Liked Songs"].some(t => t.trackId === track.trackId);
+            const btn = document.getElementById('likeBtn');
+            if(isLiked) {
+                btn.classList.remove('fa-regular', 'text-muted');
+                btn.classList.add('fa-solid', 'text-rose-500');
+            } else {
+                btn.classList.add('fa-regular', 'text-muted');
+                btn.classList.remove('fa-solid', 'text-rose-500');
+            }
+        }
+
+        function toggleLikeCurrent() {
+            if(!activeTrack) return showToast("Play a track first!");
+            const liked = customPlaylists["Liked Songs"];
+            const idx = liked.findIndex(t => t.trackId === activeTrack.trackId);
+            if (idx > -1) {
+                liked.splice(idx, 1);
+                showToast("Removed from Liked Songs");
+            } else {
+                liked.push(activeTrack);
+                showToast("Added to Liked Songs");
+            }
+            saveData();
+            checkIfLiked(activeTrack);
+        }
+
+        function renderLibrary() {
+            const container = document.getElementById('libraryPlaylists');
+            const keys = Object.keys(customPlaylists);
+            if(keys.length === 0) return;
+            
+            container.innerHTML = keys.map(name => `
+                <div class="flex items-center gap-5 p-3 cursor-pointer hover:bg-surface rounded-2xl transition border border-transparent hover:border-[rgba(255,255,255,0.05)]" onclick="openPlaylistView('${name}')">
+                    <div class="w-16 h-16 bg-elevated rounded-xl flex items-center justify-center text-[#00F0FF] shadow-inner">
+                        <i class="fa-solid ${name === 'Liked Songs' ? 'fa-heart text-rose-500' : 'fa-list-ul'} text-2xl"></i>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-white font-extrabold text-lg">${name}</p>
+                        <p class="text-muted text-sm font-medium mt-1">${customPlaylists[name].length} tracks</p>
+                    </div>
+                    <i class="fa-solid fa-chevron-right text-muted pr-2"></i>
+                </div>
+            `).join('');
+        }
+
+        function openPlaylistView(name) {
+            document.getElementById('libraryPlaylists').classList.add('hidden');
+            const detailView = document.getElementById('playlistDetail');
+            document.getElementById('playlistDetailTitle').innerText = name;
+            
+            const tracks = customPlaylists[name] || [];
+            const container = document.getElementById('playlistDetailTracks');
+            
+            if(tracks.length === 0) {
+                container.innerHTML = `<p class="text-muted text-center mt-10 font-medium">This playlist is empty.</p>`;
+            } else {
+                window.tempPlaylistTracks = tracks;
+                container.innerHTML = tracks.map((track, idx) => `
+                    <div class="flex items-center gap-4 p-3 hover:bg-surface rounded-2xl cursor-pointer transition border border-transparent hover:border-[rgba(255,255,255,0.05)]" onclick="playFromContext(window.tempPlaylistTracks, ${idx})">
+                        <img src="${track.artworkUrl100}" class="w-12 h-12 rounded-lg object-cover">
+                        <div class="flex-1 overflow-hidden">
+                            <p class="text-white text-sm font-bold truncate">${track.trackName}</p>
+                            <p class="text-muted text-xs font-medium truncate mt-1">${track.artistName}</p>
+                        </div>
+                        <i class="fa-solid fa-play text-muted hover:text-[#00F0FF] transition p-2"></i>
+                    </div>
+                `).join('');
+            }
+            detailView.classList.remove('hidden');
+            detailView.classList.add('flex');
+        }
+
+        function closePlaylistView() {
+            document.getElementById('playlistDetail').classList.add('hidden');
+            document.getElementById('playlistDetail').classList.remove('flex');
+            document.getElementById('libraryPlaylists').classList.remove('hidden');
+        }
+
+        function showCreatePlaylistModal() {
+            document.getElementById('createPlaylistModal').classList.remove('hidden');
+            document.getElementById('newPlaylistInput').focus();
+        }
+        function closeCreatePlaylistModal() {
+            document.getElementById('createPlaylistModal').classList.add('hidden');
+            document.getElementById('newPlaylistInput').value = '';
+        }
+        function submitNewPlaylist() {
+            const name = document.getElementById('newPlaylistInput').value.trim();
+            if(name && !customPlaylists[name]) {
+                customPlaylists[name] = [];
+                saveData();
+                closeCreatePlaylistModal();
+                showToast(`Created playlist: ${name}`);
+            } else if (customPlaylists[name]) {
+                showToast("Playlist already exists!");
+            }
+        }
+
+        function showPlaylistSelectorModal() {
+            if(!activeTrack) return showToast("Play a track first!");
+            const modal = document.getElementById('addToPlaylistModal');
+            const list = document.getElementById('modalPlaylistList');
+            list.innerHTML = Object.keys(customPlaylists).map(name => `
+                <div class="flex items-center justify-between p-4 hover:bg-elevated rounded-2xl cursor-pointer transition mb-2 border border-transparent hover:border-[#00F0FF]" onclick="addToPlaylist('${name}')">
+                    <span class="font-extrabold text-white">${name}</span>
+                    <i class="fa-solid fa-plus text-[#00F0FF]"></i>
+                </div>
+            `).join('');
+            modal.classList.remove('hidden');
+        }
+        function closePlaylistSelectorModal() {
+            document.getElementById('addToPlaylistModal').classList.add('hidden');
+        }
+
+        function addToPlaylist(name) {
+            const exists = customPlaylists[name].some(t => t.trackId === activeTrack.trackId);
+            if(!exists) {
+                customPlaylists[name].push(activeTrack);
+                showToast(`Saved to ${name}`);
+            } else {
+                showToast(`Already in ${name}`);
+            }
+            saveData();
+            closePlaylistSelectorModal();
+        }
+
+        function saveData() {
+            localStorage.setItem('echoes_pro_playlists', JSON.stringify(customPlaylists));
+            if(!document.getElementById('view-library').classList.contains('hidden') && document.getElementById('playlistDetail').classList.contains('hidden')) {
+                renderLibrary();
+            }
+        }
+
+        // --- VISUALIZER ---
+        const canvas = document.getElementById('visualizer');
+        const ctx = canvas.getContext('2d');
+        function drawVisualizer() {
+            if(document.getElementById('playerEqView').classList.contains('hidden')) {
+                requestAnimationFrame(drawVisualizer);
+                return;
+            }
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            const bars = 40;
+            const barWidth = canvas.width / bars;
+            for (let i = 0; i < bars; i++) {
+                const barHeight = audio.paused ? 2 : Math.random() * (canvas.height - 10) + 5;
+                ctx.fillStyle = '#00F0FF';
+                ctx.fillRect(i * barWidth, canvas.height - barHeight, barWidth - 1.5, barHeight);
+            }
+            requestAnimationFrame(drawVisualizer);
+        }
+
+        // Initialize
+        window.onload = () => {
+            initHome();
+            loadExplore('Viral Now', 'Viral TikTok Songs');
+        };
+    </script>
+</body>
+</html>

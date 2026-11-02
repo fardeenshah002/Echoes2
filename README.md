@@ -1,6 +1,6 @@
 # ECHOES - Pro Audio Streaming Suite 🎧⚡
 
-A sleek, high-fidelity progressive music streaming application crafted with a custom **Deep Space & Neon Cyan** aesthetic. ECHOES delivers an intuitive, mobile-optimized experience with real-time discovery, intelligent listening history recommendations, system audio routing, and seamless playlist curation.
+A sleek, high-fidelity progressive music streaming application crafted with a custom Deep Space & Platinum Silver aesthetic. ECHOES delivers an intuitive, mobile-optimized experience with real-time discovery, intelligent listening history recommendations, system audio routing, and seamless playlist curation.
 
 ---
 
